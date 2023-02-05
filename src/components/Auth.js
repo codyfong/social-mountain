@@ -1,7 +1,8 @@
 import {useState, useContext} from 'react'
 import axios from 'axios'
 import AuthContext from '../store/authContext'
- 
+import url from '../url'
+
 const Auth = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
@@ -15,7 +16,6 @@ const Auth = () => {
             password
         }
     
-        const url = 'https://socialmtn.devmountain.com'
     
         axios.post(register ? `${url}/register` : `${url}/login`, body)
             .then(({data}) => {
@@ -48,7 +48,9 @@ const Auth = () => {
                     {register ? 'Sign Up' : 'Login'}
                 </button>
             </form>
-            <button className='form-btn'>Need to {register ? 'Login' : 'Sign Up'}?</button>
+            <button className='form-btn' onClick={() => setRegister(!register)}>
+                Need to {register ? 'Login' : 'Sign Up'}?
+            </button>
         </main>
    )
 }

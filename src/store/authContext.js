@@ -19,6 +19,7 @@ const calculateRemainingTime = (exp) => {
 const getLocalData = () => {
   const storedToken = localStorage.getItem('token')
   const storedExp = localStorage.getItem('exp')
+  const storedId = localStorage.getItem('userId')
 
   const remainingTime = calculateRemainingTime(storedExp)
 
@@ -32,6 +33,7 @@ const getLocalData = () => {
   return {
     token: storedToken,
     duration: remainingTime,
+    userId: storedId
   }
 }
 
@@ -40,19 +42,22 @@ const getLocalData = () => {
 export const AuthContextProvider = (props) => {
   const localData = getLocalData()
   
+  let initialId
   let initialToken
+
   if (localData) {
     initialToken = localData.token
+    initialId = localData.userId
+    console.log(localData)
   }
 
   const [token, setToken] = useState(initialToken)
-  const [userId, setUserId] = useState(null)
+  const [userId, setUserId] = useState(initialId)
 
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null)
     setUserId(null)
-
     localStorage.removeItem('token')
     localStorage.removeItem('exp')
     localStorage.removeItem('userId')
@@ -60,18 +65,25 @@ export const AuthContextProvider = (props) => {
     if (logoutTimer) {
       clearTimeout(logoutTimer)
     }
-  }
+  }, [])
 
   const login = (token, exp, userId) => {
     setToken(token)
     setUserId(userId)
     localStorage.setItem('token', token)
     localStorage.setItem('exp', exp)
+    localStorage.setItem('userId', userId)
     
     const remainingTime = calculateRemainingTime(exp)
     
     logoutTimer = setTimeout(logout, remainingTime)
     }
+
+  useEffect(() => {
+    if (localData) {
+      logoutTimer = setTimeout(logout, localData.duration)
+    }
+  }, [localData, logout])
 
   const contextValue = {
     token,
